@@ -9,3 +9,10 @@
 ### To Build & Test the Project, run the following commands
 1. `stack build`
 2. `stack test`
+
+## Application's domain
+
+Travel agency:
+- It has routes that can be combined to create new routes.
+- It has hotels, excursions, etc.
+
