@@ -5,10 +5,23 @@ module Lib1
 -- | This function returns a list of words
 -- to be autocompleted in your program's repl.
 completions :: [String]
-completions = []
+completions = [
+    "completions",
+    "locations",
+    "nights",
+    "hotelStays",
+    "routes",
+    "route"
+]
 
 locations :: [String]
-locations = ["Vilnius, Lithuania", "Warsaw, Poland", "Prague, Czechia", "Vienna, Austria", "Berlin, Germany"]
+locations = [
+    "Vilnius, Lithuania", 
+    "Warsaw, Poland", 
+    "Prague, Czechia", 
+    "Vienna, Austria", 
+    "Berlin, Germany"
+]
 
 nights :: [Int]
 nights = [1..7]
