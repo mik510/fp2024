@@ -7,15 +7,20 @@ module Lib1
 completions :: [String]
 completions = []
 
-location :: [String]
-location = ["Vilnius, Lithuania", "Warsaw, Poland", "Prague, Czechia", "Vienna, Austria", "Berlin, Germany"]
+locations :: [String]
+locations = ["Vilnius, Lithuania", "Warsaw, Poland", "Prague, Czechia", "Vienna, Austria", "Berlin, Germany"]
 
 nights :: [Int]
 nights = [1..7]
 
-hotelStay :: [(String, Int)]
-hotelStay = [(location, nights) | location <- location, nights <- nights]
+hotelStays :: [(String, Int)]
+hotelStays = [(location, nights) | location <- locations, nights <- nights]
 
-route :: [String] -> [[(String, Int)]]
-route = [] = [[]]
---route 
+routes :: [[(String, Int)]]
+routes = route locations where
+    route :: [String] -> [[(String, Int)]]
+    route [] = [[]]
+    route (locaton: rest) = do
+        hotelStay <- hotelStays
+        restRoutes <- route rest
+        return (hotelStay : restRoutes)

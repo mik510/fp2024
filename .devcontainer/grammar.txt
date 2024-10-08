@@ -1,4 +1,4 @@
-<location> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
+<locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
 <nights> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 
-<hotel_stay> ::= <location><nights>
-<route> ::= <hotel_stay> | <hotel_stay><route>
+<hotelStays> ::= <locations><nights>
+<routes> ::= <hotelStays> | <hotelStays><routes>
