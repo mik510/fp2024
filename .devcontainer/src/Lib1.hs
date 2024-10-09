@@ -12,7 +12,7 @@ completions = [
     "hotelStays",
     "routes",
     "route"
-]
+    ]
 
 locations :: [String]
 locations = [
@@ -21,7 +21,7 @@ locations = [
     "Prague, Czechia", 
     "Vienna, Austria", 
     "Berlin, Germany"
-]
+    ]
 
 nights :: [Int]
 nights = [1..7]
