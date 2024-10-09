@@ -23,7 +23,7 @@ instance Show Query where
 -- | Parses user's input.
 -- The function must have tests.
 parseQuery :: String -> Either String Query
-parseQuery _ = Left "Not implemented 2"
+parseQuery _ = Left "Some error message"
 
 -- | An entity which represents your program's state.
 -- Currently it has no constructors but you can introduce
