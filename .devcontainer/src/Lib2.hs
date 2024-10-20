@@ -7,10 +7,6 @@ module Lib2
     stateTransition
     ) where
 
--- | An entity which represets user input.
--- It should match the grammar from Laboratory work #1.
--- Currently it has no constructors but you can introduce
--- as many as needed.
 data Query =
   LocationQuery String
   | NightQuery Int
