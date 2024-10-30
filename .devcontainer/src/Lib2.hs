@@ -10,8 +10,6 @@ module Lib2
     emptyState,
     stateTransition
     ) where
-import Text.Parsec (Parser, parse)
--- ^ removed State(stateInput) from brackets because of ambiguity
 
 data Query =
   LocationQuery String
@@ -37,16 +35,75 @@ showHotelStays (_ : rest) = showHotelStays rest
 -- The function must have tests.
 parseQuery :: String -> Either String Query
 parseQuery input =
-  case parse (queryParser :: Parser Query) "" input of
-    Left err -> Left $ show err
-    Right query -> Right query
+  case parseHelp input of
+    Left err -> Left err
+    Right (query, _) -> Right query
 
-queryParser :: Parser Query
-queryParser =
-  LocationQuery <$> string "location:" <*> many (noneOf " \n")
-  <|> NightQuery <$> string "nights:" <*> many (noneOf " \n")
-  <|> HotelStayQuery <$> string "location:" <*> many (noneOf " \n") <*> string "for" <*> many (noneOf "\n")
-  <|> RouteQuery <$> string "route:" <*> many (queryParser)
+parseHelp :: String -> Either String (Query, String)
+parseHelp [] = Left "Unexpected end of input"
+parseHelp (' ':xs) = parseHelp xs
+parseHelp ('\n':xs) = parseHelp xs
+parseHelp input =
+  case parseLocationQuery input of
+    Just location ->
+      case parseNightQuery input of
+        Just nights ->
+          Right (HotelStayQuery location nights, rest)
+        Nothing -> parseRouteQuery input
+    Nothing -> parseRouteQuery
+
+parseLocationQuery :: String -> Maybe String
+parseLocationQuery input =
+  case input of
+    "Vilnius, Lithuania" -> Just "Vilnius"
+    "Warsaw, Poland" -> Just "Warsaw"
+    "Prague, Czechia" -> Just "Prague"
+    "Vienna, Austria" -> Just "Vienna"
+    "Berlin, Germany" -> Just "Berlin"
+    _ -> Nothing
+
+parseNightQuery :: String -> Maybe Int
+parseNightQuery input =
+  case readMaybe (takeWhile isDigit input) of
+    Just n -> if n >= 1 && n <= 7
+      then Just n
+      else Nothing
+    Nothing -> Nothing
+
+parseHotelStayQuery :: String -> Either String (Query, String)
+parseHotelStayQuery input =
+  case parseLocationQuery input of
+    Just location ->
+      case span (/= 'f') input of
+        (before, rest) ->
+          case span isDigit rest of
+            (nightsStr, rest') ->
+              case readMaybe nightsStr of
+                Just n -> if n >= 1 && n <= 7
+                          then Right (HotelStayQuery location n, rest')
+                          else Left "Invalid number of nights (1-7)"
+                Nothing -> Left "Invalid number of nights"
+            _ -> Left "Expected number of nights after 'for'"
+    _ -> Left "Invalid location"
+
+parseRouteQuery :: String -> Either String (Query, String)
+parseRouteQuery input =
+  case span (/= 'r') input of
+    (before, "route:" ++ rest) ->
+      case parseManyQueries rest of
+        Right (queries, rest') -> Right (RouteQuery queries, rest')
+        Left err -> Left err
+    _ -> Left "Expected 'route:'"
+
+parseManyQueries :: String -> ([Query], String)
+parseManyQueries [] = ([], [])
+parseManyQueries input =
+  case parseHelp input of
+    Left err -> Left err
+    Right (query, rest) ->
+      case parseManyQueries rest of
+        Right (queries, rest') -> Right (query : queries, rest')
+        Left err -> Left err
 
 data State = State
   { counter :: Int
