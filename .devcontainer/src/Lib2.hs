@@ -50,6 +50,8 @@ parseQuery input =
             Just nights -> Just $ NightQuery nights
             Nothing -> Nothing
 
+
+-- <locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
 parseLocationQuery :: String -> Maybe String
 parseLocationQuery input =
   case input of
@@ -60,11 +62,15 @@ parseLocationQuery input =
     "Berlin, Germany" -> Just "Berlin"
     _ -> Nothing
 
+-- <nights> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 
 parseNightQuery :: String -> Maybe Int
 parseNightQuery input =
   case read input :: Maybe Int of
     Just n | 1 <= n && n <= 7 -> Just n
     _ -> Nothing
+
+-- <hotelStays> ::= <locations><nights>
+-- <routes> ::= <hotelStays> | <hotelStays><routes>
 
 data State = 
   EmptyState
