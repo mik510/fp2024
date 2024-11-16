@@ -16,13 +16,13 @@ unitTests = testGroup "Lib1 tests"
   [ testCase "Valid Hotel Stay" $
       Lib2.parseQuery "Vilnius, Lithuania 3" @?= Just (Lib2.HotelStayQuery ("Vilnius", 3))
   , testCase "Invalid Input" $
-      Lib2.parseQuery "invalid input" @?= Nothing
+      Lib2.parseQuery "gibberish" @?= Nothing
   , testCase "Missing Location" $
-      Lib2.parseQuery "3" @?= Nothing
+      Lib2.parseQuery "6" @?= Nothing
   , testCase "Missing Nights" $
-      Lib2.parseQuery "Vilnius, Lithuania" @?= Nothing
+      Lib2.parseQuery "Berlin, Germany" @?= Nothing
   , testCase "Invalid Night Count" $
-      Lib2.parseQuery "Vilnius, Lithuania 10" @?= Nothing
+      Lib2.parseQuery "Warsaw, Poland 12" @?= Nothing
   , testCase "Valid State Transition: Location" $
       Lib2.stateTransition Lib2.emptyState (Lib2.LocationQuery "Vilnius") @?= Right (Lib2.LocationState "Vilnius", ["New state: Location - Vilnius"])
   , testCase "Valid State Transition: Hotel Stay" $
