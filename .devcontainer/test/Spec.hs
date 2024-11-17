@@ -23,6 +23,8 @@ unitTests = testGroup "Lib1 tests"
       Lib2.parseQuery "Berlin, Germany" @?= Nothing
   , testCase "Invalid Night Count" $
       Lib2.parseQuery "Warsaw, Poland 12" @?= Nothing
+  , testCase "No input" $
+      Lib2.parseQuery "       " @?= Nothing
   , testCase "Valid State Transition: Location" $
       Lib2.stateTransition Lib2.emptyState (Lib2.LocationQuery "Vilnius") @?= Right (Lib2.LocationState "Vilnius", ["New state: Location - Vilnius"])
   , testCase "Valid State Transition: Hotel Stay" $
