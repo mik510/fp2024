@@ -25,6 +25,9 @@ instance Show Query where
 parseQuery :: String -> Either String Query
 parseQuery _ = Left "Some error message"
 
+--type Parser a = String -> a
+
+
 -- | An entity which represents your program's state.
 -- Currently it has no constructors but you can introduce
 -- as many as needed.
