@@ -11,14 +11,26 @@ module Lib2
 -- It should match the grammar from Laboratory work #1.
 -- Currently it has no constructors but you can introduce
 -- as many as needed.
-data Query
+data Query =
+  LocationQuery String
+  | NightQuery Int
+  | HotelStayQuery (String, Int)
+  | RouteQuery [Query]
 
 -- | The instances are needed basically for tests
 instance Eq Query where
   (==) _ _= False
 
 instance Show Query where
-  show _ = ""
+  show (LocationQuery location) = "Location: " ++ location
+  show (NightQuery nights) = "Nights: " ++ show nights
+  show (HotelStayQuery (location, nights)) = "Hotel stay: " ++ location ++ " for " ++ show nights
+  show (RouteQuery route) = "Route: " ++ show (showHotelStays route)
+
+showHotelStays :: [Query] -> String
+showHotelStays [] = ""
+showHotelStays (HotelStayQuery (location, nights) : rest) = "Hotel stay: " ++ location ++ " for " ++ show nights ++ ", " ++ showHotelStays rest
+showHotelStays (_ : rest) = showHotelStays rest
 
 -- | Parses user's input.
 -- The function must have tests.
