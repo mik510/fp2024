@@ -6,11 +6,26 @@
 {-# HLINT ignore "Use newtype instead of data" #-}
 module Lib2
     ( Query(..),
+    Location(..),
+    Nights(..),
+    HotelStay(..),
+    Route(..),
+    showHotelStays,
     parseQuery,
+    parseLocationQuery,
+    parseNightQuery,
+    parseHotelStayQuery,
+    parseRouteQuery,
+    routeToQueries,
     State(..),
     emptyState,
     stateTransition
     ) where
+
+import qualified Data.Char as C
+import qualified Data.List as L
+
+type Parser a = String -> Either String (a, String)
 
 data Query =
   LocationQuery String
