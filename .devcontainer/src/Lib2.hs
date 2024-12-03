@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Unused LANGUAGE pragma" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 module Lib2
     ( Query(..),
     parseQuery,
@@ -9,7 +10,7 @@ module Lib2
     emptyState,
     stateTransition
     ) where
-import Text.Parsec ()
+import Text.Parsec (Parser, parse)
 -- ^ removed State(stateInput) from brackets because of ambiguity
 
 data Query =
@@ -33,10 +34,19 @@ showHotelStays [] = ""
 showHotelStays (HotelStayQuery (location, nights) : rest) = "Hotel stay: " ++ location ++ " for " ++ show nights ++ ", " ++ showHotelStays rest
 showHotelStays (_ : rest) = showHotelStays rest
 
--- | Parses user's input.
 -- The function must have tests.
 parseQuery :: String -> Either String Query
-parseQuery _ = Left "Some error message"
+parseQuery input =
+  case parse (queryParser :: Parser Query) "" input of
+    Left err -> Left $ show err
+    Right query -> Right query
+
+queryParser :: Parser Query
+queryParser =
+  LocationQuery <$> string "location:" <*> many (noneOf " \n")
+  <|> NightQuery <$> string "nights:" <*> many (noneOf " \n")
+  <|> HotelStayQuery <$> string "location:" <*> many (noneOf " \n") <*> string "for" <*> many (noneOf "\n")
+  <|> RouteQuery <$> string "route:" <*> many (queryParser)
 
 data State = State
   { counter :: Int
