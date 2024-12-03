@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Unused LANGUAGE pragma" #-}
 {-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Use newtype instead of data" #-}
 module Lib2
     ( Query(..),
     parseQuery,
@@ -16,6 +17,11 @@ data Query =
   | NightQuery Int
   | HotelStayQuery (String, Int)
   | RouteQuery [Query]
+
+data Location = Vilnius | Warsaw | Prague | Vienna | Berlin deriving (Eq, Show)
+data Nights = Nights Int deriving (Eq, Show)
+data HotelStay = HotelStay Location Nights deriving (Show)
+data Route = SingleStay HotelStay | MultipleStays HotelStay Route deriving (Show)
 
 instance Eq Query where
   (==) :: Query -> Query -> Bool
@@ -44,33 +50,60 @@ parseQuery input =
       | otherwise -> Nothing
     Nothing ->
       case parseLocationQuery input of
-        Just location -> Just $ LocationQuery location
+        Just location -> Just $ LocationQuery (show location)
         Nothing ->
           case parseNightQuery input of
-            Just nights -> Just $ NightQuery nights
-            Nothing -> Nothing
-
+            Just (Nights n) -> Just $ NightQuery n
+            Nothing ->
+              case parseRouteQuery input of
+                Just route -> Just $ RouteQuery (routeToQueries route)
+                Nothing -> Nothing
 
 -- <locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
-parseLocationQuery :: String -> Maybe String
+parseLocationQuery :: String -> Maybe Location
 parseLocationQuery input =
   case input of
-    "Vilnius, Lithuania" -> Just "Vilnius"
-    "Warsaw, Poland" -> Just "Warsaw"
-    "Prague, Czechia" -> Just "Prague"
-    "Vienna, Austria" -> Just "Vienna"
-    "Berlin, Germany" -> Just "Berlin"
+    "Vilnius, Lithuania" -> Just Vilnius
+    "Warsaw, Poland" -> Just Warsaw
+    "Prague, Czechia" -> Just Prague
+    "Vienna, Austria" -> Just Vienna
+    "Berlin, Germany" -> Just Berlin
     _ -> Nothing
 
 -- <nights> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 
-parseNightQuery :: String -> Maybe Int
+parseNightQuery :: String -> Maybe Nights
 parseNightQuery input =
   case read input :: Maybe Int of
-    Just n | 1 <= n && n <= 7 -> Just n
+    Just n | 1 <= n && n <= 7 -> Just (Nights n)
     _ -> Nothing
 
 -- <hotelStays> ::= <locations><nights>
+parseHotelStayQuery :: String -> Maybe HotelStay
+parseHotelStayQuery input =
+  case parseLocationQuery input of
+    Just location -> 
+      case parseNightQuery (drop (length (show location) + 2) input) of
+        Just nights -> Just (HotelStay location nights)
+        Nothing -> Nothing
+    Nothing -> Nothing
+
 -- <routes> ::= <hotelStays> | <hotelStays><routes>
+parseRouteQuery :: String -> Maybe Route
+parseRouteQuery [] = Nothing
+parseRouteQuery input =
+  case parseHotelStayQuery input of
+    Just stay -> 
+      case parseRouteQuery (drop (length (show stay)) input) of
+        Nothing -> Just (SingleStay stay)
+        Just route -> Just (MultipleStays stay route)
+    Nothing -> Nothing
+
+-- parse helper (routes to queries)
+routeToQueries :: Route -> [Query]
+routeToQueries (SingleStay (HotelStay location (Nights nights))) = 
+  [HotelStayQuery (show location, nights)]
+routeToQueries (MultipleStays (HotelStay location (Nights nights)) route) = 
+  HotelStayQuery (show location, nights) : routeToQueries route
 
 data State = 
   EmptyState
@@ -85,4 +118,5 @@ emptyState = EmptyState
 stateTransition :: State -> Query -> Maybe State
 stateTransition EmptyState (LocationQuery location) = Just $ LocationState location
 stateTransition (LocationState location) (NightQuery nights) = Just $ HotelStayState location nights
+stateTransition (HotelStayState location nights) (RouteQuery route) = Just $ RouteState route
 stateTransition _ _ = Just EmptyState
