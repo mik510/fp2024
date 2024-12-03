@@ -4,13 +4,13 @@ cabal-version: 2.2
 --
 -- see: https://github.com/sol/hpack
 
-name:           fp2024
+name:           fp_labs_mik510
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/fp2024#readme>
-homepage:       https://github.com/githubuser/fp2024#readme
-bug-reports:    https://github.com/githubuser/fp2024/issues
-author:         Author name here
-maintainer:     example@example.com
+description:    Please see the README on GitHub at <https://github.com/mik510/fp_labs_mik510/blob/main/.devcontainer/README.md>
+homepage:       https://github.com/mik510/fp_labs_mik510#readme
+bug-reports:    https://github.com/mik510/fp_labs_mik510/issues
+author:         Julija Mikeliūnaitė
+maintainer:     julija.mikeliunaite@mif.stud.vu.lt
 copyright:      2024 Author name here
 license:        BSD-3-Clause
 license-file:   LICENSE
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/fp2024
+  location: https://github.com/mik510/fp_labs_mik510
 
 library
   exposed-modules:
@@ -31,9 +31,9 @@ library
       Lib1
       Lib2
   other-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   autogen-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
@@ -44,9 +44,9 @@ library
 executable fp2024-one
   main-is: Main.hs
   other-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   autogen-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   hs-source-dirs:
       app1
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -59,9 +59,9 @@ executable fp2024-one
 executable fp2024-two
   main-is: Main.hs
   other-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   autogen-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   hs-source-dirs:
       app2
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -76,9 +76,9 @@ test-suite fp2024-doctest
   type: exitcode-stdio-1.0
   main-is: Doctest.hs
   other-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   autogen-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   hs-source-dirs:
       doctest
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
@@ -91,9 +91,9 @@ test-suite fp2024-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   autogen-modules:
-      Paths_fp2024
+      Paths_fp_labs_mik510
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
