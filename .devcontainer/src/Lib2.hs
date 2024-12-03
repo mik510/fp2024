@@ -115,8 +115,8 @@ data State =
 emptyState :: State
 emptyState = EmptyState
 
-stateTransition :: State -> Query -> Maybe State
-stateTransition EmptyState (LocationQuery location) = Just $ LocationState location
-stateTransition (LocationState location) (NightQuery nights) = Just $ HotelStayState location nights
-stateTransition (HotelStayState location nights) (RouteQuery route) = Just $ RouteState route
-stateTransition _ _ = Just EmptyState
+stateTransition :: State -> Query -> Either String (State, [String])
+stateTransition EmptyState (LocationQuery location) = Right (LocationState location, ["New state: Location - " ++ location])
+stateTransition (LocationState location) (NightQuery nights) = Right (HotelStayState location nights, ["New state: Hotel Stay", "  Location: " ++ location, "  Nights: " ++ show nights])
+stateTransition (HotelStayState location nights) (RouteQuery route) = Right (RouteState route, ["New state: Route", "  " ++ show route])
+stateTransition _ _ = Left "Invalid state transition"
