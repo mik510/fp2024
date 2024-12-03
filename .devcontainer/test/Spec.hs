@@ -13,10 +13,14 @@ tests = testGroup "Tests" [unitTests]
 
 unitTests :: TestTree
 unitTests = testGroup "Lib1 tests"
-  [ testCase "List of completions is not empty" $
-      null Lib1.completions @?= False,
-    testCase "Parsing case 1 - give a better name" $
-      Lib2.parseQuery "" @?= Left "Some error message",
-    testCase "Parsing case 2 - give a better name" $
-      Lib2.parseQuery "o" @?= Left "Some error message"
-  ]
+  [ testCase "Valid Hotel Stay" $
+        Lib2.parseQuery "Vilnius, Lithuania 3" @?= Just (Lib2.HotelStayQuery ("Vilnius", 3))
+      , testCase "Invalid Input" $
+        Lib2.parseQuery "invalid input" @?= Nothing
+      , testCase "Missing Location" $
+        Lib2.parseQuery "3" @?= Nothing
+      , testCase "Missing Nights" $
+        Lib2.parseQuery "Vilnius, Lithuania" @?= Nothing
+      , testCase "Invalid Night Count" $
+        Lib2.parseQuery "Vilnius, Lithuania 10" @?= Nothing
+    ]
