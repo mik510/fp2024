@@ -1,0 +1,2 @@
+<location> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
+<route> ::= <location> | <location><route>
