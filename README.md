@@ -14,5 +14,6 @@
 
 Travel agency:
 - It has routes that can be combined to create new routes.
-- It has hotels, excursions, etc.
+- It has hotels, landmarks, etc.
+- It has locations (5 countries in Europe, capitals only)
 
