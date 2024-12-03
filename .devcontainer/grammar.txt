@@ -1,4 +1,4 @@
-<> ::= <commands>
+<root> ::= <commands>
 <command> ::= <addHotelStay> | <removeHotelStay> | <changeHotelStay>
 <addHotelStay> ::= add <hotelStays>
 <removeHotelStay> ::= remove <hotelStays>
