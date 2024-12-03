@@ -1,3 +1,9 @@
+<> ::= <commands>
+<command> ::= <addHotelStay> | <removeHotelStay> | <changeHotelStay>
+<addHotelStay> ::= add <hotelStays>
+<removeHotelStay> ::= remove <hotelStays>
+<changeHotelStay> ::= change <hotelStays><hotelStays>
+
 <locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
 <nights> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 
 <hotelStays> ::= <locations><nights>
