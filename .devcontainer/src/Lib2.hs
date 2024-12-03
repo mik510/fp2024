@@ -42,22 +42,22 @@ showHotelStays [] = ""
 showHotelStays (HotelStayQuery (location, nights) : rest) = "Hotel stay: " ++ location ++ " for " ++ show nights ++ ", " ++ showHotelStays rest
 showHotelStays (_ : rest) = showHotelStays rest
 
-parseQuery :: String -> Maybe Query
+parseQuery :: String -> Either String Query
 parseQuery input =
   case read input :: Maybe (String, Int) of
     Just (location, nights)
-      | 1 <= nights && nights <= 7 -> Just $ HotelStayQuery (location, nights)
-      | otherwise -> Nothing
+      | 1 <= nights && nights <= 7 -> Right $ HotelStayQuery (location, nights)
+      | otherwise -> Left "Invalid number of nights"
     Nothing ->
       case parseLocationQuery input of
-        Just location -> Just $ LocationQuery (show location)
+        Just location -> Right $ LocationQuery (show location)
         Nothing ->
           case parseNightQuery input of
-            Just (Nights n) -> Just $ NightQuery n
+            Just (Nights n) -> Right $ NightQuery n
             Nothing ->
               case parseRouteQuery input of
-                Just route -> Just $ RouteQuery (routeToQueries route)
-                Nothing -> Nothing
+                Just route -> Right $ RouteQuery (routeToQueries route)
+                Nothing -> Left "Invalid input format"
 
 -- <locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" | "Vienna, Austria" | "Berlin, Germany"
 parseLocationQuery :: String -> Maybe Location
@@ -111,12 +111,18 @@ data State =
   | NightsState String Int
   | HotelStayState String Int
   | RouteState [Query]
+  | ErrorState String
+  deriving (Show)
 
 emptyState :: State
 emptyState = EmptyState
 
-stateTransition :: State -> Query -> Either String (State, [String])
-stateTransition EmptyState (LocationQuery location) = Right (LocationState location, ["New state: Location - " ++ location])
-stateTransition (LocationState location) (NightQuery nights) = Right (HotelStayState location nights, ["New state: Hotel Stay", "  Location: " ++ location, "  Nights: " ++ show nights])
-stateTransition (HotelStayState location nights) (RouteQuery route) = Right (RouteState route, ["New state: Route", "  " ++ show route])
-stateTransition _ _ = Left "Invalid state transition"
+stateTransition :: State -> Query -> Either String ([String], State)
+stateTransition EmptyState (LocationQuery location) = 
+  Right (["Location set to: " ++ location], LocationState location)
+stateTransition (LocationState location) (NightQuery nights) = 
+  Right (["Nights set to: " ++ show nights], HotelStayState location nights)
+stateTransition (HotelStayState location nights) (RouteQuery route) = 
+  Right (["Route created for: " ++ location ++ " with " ++ show nights ++ " nights"], RouteState route)
+stateTransition _ _ = 
+  Left "Invalid state transition"
