@@ -47,8 +47,7 @@ type Parser a = String -> Either String (a, String)
 -- <root> ::= <command>
 parseQuery :: String -> Either String Query
 parseQuery input =
-  case read input :: Maybe (String, Int) of
-      
+  case parseCommandQuery input of
 
 -- <command> ::= <addHotelStay> | <removeHotelStay> | <changeHotelStay>
 parseCommandQuery :: String -> Either String Command
@@ -64,11 +63,37 @@ parseCommandQuery input =
 parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseAddHotelStayQuery input =
   case parseCommandQuery input of
-    Add -> 
+    () -> 
       case RouteQuery input of
         Just (location nights) -> Just (HotelStay (location, nights))
         _ -> "Invalid hotel stay to add"
     _ -> "Invalid command"
+
+-- 
+-- EG
+parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
+parseAddHotelStayQuery input =
+  case parseAdd input of
+    Left e -> Left "We fucked up"
+    (_, r1) -> case parseHotelStays r1 of
+      Left e -> Left "Uh oh, baaaad hotel stays!"
+      (hotelStays, r2) -> Right Add hotelStays
+
+parseAdd :: String -> Either String (Add, String)
+parseAdd input = case parseLiteral "Add" input of
+  Left e -> Left "Boo"
+  Right (_, r) -> Right (Add, r)
+
+parseLiteral :: String -> String -> Either String (String, String)
+parseLiteral [] input = Right ("", input)
+parseLiteral (x:xs) input = case parseChar x input of
+  Left e -> Left "Oopsy~"
+  Right (_, r) -> parseLiteral xs r
+
+parseChar :: Char -> String -> Eiter String (Char, String)
+parseChar char (x:xs) = case char == x of
+  True -> Right (x, xs)
+  False -> Left "Failed to parse Character!"
 
 -- TODO implement remove command
 -- <removeHotelStay> ::= remove <hotelStays> 
