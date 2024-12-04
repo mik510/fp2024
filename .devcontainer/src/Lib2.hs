@@ -41,6 +41,8 @@ instance Show Query where
   show (HotelStayQuery (location, nights)) = "Hotel stay: " ++ location ++ " for " ++ show nights
   show (RouteQuery route) = "Route: " ++ show (showHotelStays route)
 
+type Parser a = String -> Either String (a, String)
+
 -- TODO implement main parser
 -- <root> ::= <command>
 parseQuery :: String -> Either String Query
@@ -123,48 +125,24 @@ parseRouteQuery input =
         Just route -> Just (MultipleStays stay route)
     Nothing -> Nothing
 
+data State =
+  EmptyState
+  | LocationState String
+  | NightsState Int
+  | HotelStayState String Int
+  | RouteState [Query]
+  | ErrorState String
+  deriving (Show)
 
-type Parser a = String -> Either String (a, String)
-
--- | An entity which represents your program's state.
--- Currently it has no constructors but you can introduce
--- as many as needed.
-data State
-
--- | Creates an initial program's state.
--- It is called once when the program starts.
 emptyState :: State
-emptyState = error "Not implemented 1"
+emptyState = EmptyState
 
--- | Updates a state according to a query.
--- This allows your program to share the state
--- between repl iterations.
--- Right contains an optional message to print and
--- an updated program's state.
 stateTransition :: State -> Query -> Either String (Maybe String, State)
-stateTransition _ _ = Left "Not implemented 3"
-
-{-
-parseP5 s =
-  case matchHeader (L8.pack "P5") s of
-    Nothing -> Nothing
-    Just s1 ->
-      case getNat s1 of
-        Nothing -> Nothing
-        Just (width, s2) ->
-          case getNat (L8.dropWhile isSpace s2) of
-            Nothing -> Nothing
-            Just (height, s3) ->
-              case getNat (L8.dropWhile isSpace s3) of
-                Nothing -> Nothing
-                Just (maxGrey, s4)
-                  | maxGrey > 255 -> Nothing
-                  | otherwise ->
-                      case getBytes 1 s4 of
-                        Nothing -> Nothing
-                        Just (_, s5) ->
-                          case getBytes (width * height) s5 of
-                            Nothing -> Nothing
-                            Just (bitmap, s6) ->
-                              Just (Greymap width height maxGrey bitmap, s6)
--}
+stateTransition EmptyState (LocationQuery location) =
+  Right (["Location set to: " ++ show location], LocationState location)
+stateTransition (LocationState location) (NightQuery nights) =
+  Right (["Nights set to: " ++ show nights], HotelStayState location nights)
+stateTransition (HotelStayState location nights) (RouteQuery route) =
+  Right (["Route created for: " ++ show location ++ " for " ++ show nights ++ " nights"], RouteState route)
+stateTransition _ _ =
+  Left "Invalid state transition"
