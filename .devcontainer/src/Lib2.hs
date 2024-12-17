@@ -25,7 +25,8 @@ data Location = Vilnius | Warsaw | Prague
   | Vienna | Berlin deriving (Eq, Show)
 data Nights = Nights Int deriving (Eq, Show)
 data HotelStay = HotelStay Location Nights deriving (Show)
-data Route = SingleStay HotelStay HotelStay | MultipleStays HotelStay Route deriving (Show)
+data Route = SingleStay HotelStay 
+  | MultipleStays HotelStay Route deriving (Show)
  
 instance Eq Query where
   (==) :: Query -> Query -> Bool
@@ -43,20 +44,29 @@ instance Show Query where
 
 type Parser a = String -> Either String (a, String)
 
--- TODO implement main parser
--- <root> ::= <command>
-parseQuery :: String -> Either String Query
-parseQuery input =
-  case parseCommandQuery input of
+-- <root> ::= <command> 
+parseQuery :: String -> Either String Query 
+parseQuery input = 
+  case parseCommandQuery input of 
+    Right (Add, rest) -> 
+      case parseLocation rest of 
+        Left err -> Left err 
+        Right (location, rest') -> 
+          case parseNights rest' of 
+          Left err -> Left err 
+          Right (nights, _) -> Right (RouteQuery [HotelStayQuery (location, nights)]) 
+    Right (Remove, _) -> Left "Remove not yet implemented" 
+    Right (Change, _) -> Left "Change not yet implemented" 
+    Left err -> Left err
 
 -- <command> ::= <addHotelStay> | <removeHotelStay> | <changeHotelStay>
-parseCommandQuery :: String -> Either String Command
-parseCommandQuery input =
-  case input of
-    "add" -> Just Add
-    "remove" -> Just Remove
-    "change" -> Just Change
-    _ -> Left "Invalid command"
+parseCommandQuery :: String -> Either String (Command, String) 
+parseCommandQuery input = 
+  case input of 
+    "add" -> Right (Add, drop (length "add") input) 
+    "remove" -> Right (Remove, drop (length "remove") input) 
+    "change" -> Right (Change, drop (length "change") input) 
+    _ -> Left "Invalid command" 
 
 -- TODO fix this
 -- <addHotelStay> ::= add <hotelStays>
@@ -69,8 +79,7 @@ parseAddHotelStayQuery input =
         _ -> "Invalid hotel stay to add"
     _ -> "Invalid command"
 
--- 
--- EG
+-- <addHotelStay> ::= add <hotelStays>
 parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseAddHotelStayQuery input =
   case parseAdd input of
