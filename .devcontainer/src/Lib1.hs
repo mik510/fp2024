@@ -7,10 +7,9 @@ module Lib1
 completions :: [String]
 completions = [
     "completions",
-    "locations",
+    "location",
     "nights",
-    "hotelStays",
-    "routes",
+    "hotelStay",
     "route"
     ]
 
