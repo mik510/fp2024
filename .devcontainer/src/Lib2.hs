@@ -40,7 +40,8 @@ instance Show Query where
   show (LocationQuery location) = "Location: " ++ location
   show (NightQuery nights) = "Nights: " ++ show nights
   show (HotelStayQuery (location, nights)) = "Hotel stay: " ++ location ++ " for " ++ show nights
-  show (RouteQuery route) = "Route: " ++ show (showHotelStays route)
+  show (RouteQuery route) = "Single hotel stay route: " ++ show (SingleStay)
+--  show (RouteQuery route) = "Multiple hotel stays route: " ++ show (MultipleStays)
 
 type Parser a = String -> Either String (a, String)
 
@@ -68,96 +69,76 @@ parseCommandQuery input =
     "change" -> Right (Change, drop (length "change") input) 
     _ -> Left "Invalid command" 
 
--- TODO fix this
 -- <addHotelStay> ::= add <hotelStays>
 parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseAddHotelStayQuery input =
   case parseCommandQuery input of
-    () -> 
-      case RouteQuery input of
-        Just (location nights) -> Just (HotelStay (location, nights))
-        _ -> "Invalid hotel stay to add"
-    _ -> "Invalid command"
-
--- <addHotelStay> ::= add <hotelStays>
-parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
-parseAddHotelStayQuery input =
-  case parseAdd input of
-    Left e -> Left "We fucked up"
-    (_, r1) -> case parseHotelStays r1 of
-      Left e -> Left "Uh oh, baaaad hotel stays!"
-      (hotelStays, r2) -> Right Add hotelStays
-
-parseAdd :: String -> Either String (Add, String)
-parseAdd input = case parseLiteral "Add" input of
-  Left e -> Left "Boo"
-  Right (_, r) -> Right (Add, r)
-
-parseLiteral :: String -> String -> Either String (String, String)
-parseLiteral [] input = Right ("", input)
-parseLiteral (x:xs) input = case parseChar x input of
-  Left e -> Left "Oopsy~"
-  Right (_, r) -> parseLiteral xs r
-
-parseChar :: Char -> String -> Eiter String (Char, String)
-parseChar char (x:xs) = case char == x of
-  True -> Right (x, xs)
-  False -> Left "Failed to parse Character!"
+    Right (Add, rest) ->
+      case parseHotelStayQuery rest of
+        Left err -> Left err
+        Right hotelStay -> Right (Add, hotelStay)
+    _ -> Left "Invalid command"
 
 -- TODO implement remove command
 -- <removeHotelStay> ::= remove <hotelStays> 
 parseRemoveHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseRemoveHotelStayQuery input =
   case parseCommandQuery input of
-    Remove ->
-      case RouteQuery input of
-        Just (location, nights) -> Just (HotelStay (location, nights))
+    Right (Remove, rest) ->
+      case parseHotelStayQuery rest of
+        Left err -> Left err
+        Right hotelStay -> Right (Remove, hotelStay)
+    _ -> Left "Invalid command"
 
 --TODO implement change command; use remove, then add
 -- <changeHotelStay> ::= change <hotelStays><hotelStays> 
 parseChangeHotelStayQuery :: String -> Either String (Command, HotelStay, HotelStay)
 parseChangeHotelStayQuery input =
   case parseCommandQuery input of
-    Change -> parseRemoveHotelStayQuery parseAddHotelStayQuery
+    Right (Change, rest) ->
+      case parseHotelStayQuery rest of
+        Left err -> Left err
+        Right hotelStay -> Right (Change, hotelStay, hotelStay)
+    _ -> Left "Invalid command"
+
+-- <hotelStays> ::= <locations><nights>
+parseHotelStayQuery :: String -> Either String HotelStay
+parseHotelStayQuery input =
+  case parseLocationQuery input of
+    Right location ->
+      case parseNightsQuery input of
+        Right nights -> Right (HotelStay location nights)
+        _ -> Left "Invalid nights"
+    _ -> Left "Invalid location"
 
 -- <locations> ::= "Vilnius, Lithuania" | "Warsaw, Poland" | "Prague, Czechia" 
 -- | "Vienna, Austria" | "Berlin, Germany"
 parseLocationQuery :: String -> Either String Location
 parseLocationQuery input =
   case input of
-    "Vilnius, Lithuania" -> Just Vilnius
-    "Warsaw, Poland" -> Just Warsaw
-    "Prague, Czechia" -> Just Prague
-    "Vienna, Austria" -> Just Vienna
-    "Berlin, Germany" -> Just Berlin
+    "Vilnius, Lithuania" -> Right Vilnius
+    "Warsaw, Poland" -> Right Warsaw
+    "Prague, Czechia" -> Right Prague
+    "Vienna, Austria" -> Right Vienna
+    "Berlin, Germany" -> Right Berlin
     _ -> Left "Invalid location"
 
 -- <nights> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 
 parseNightsQuery :: String -> Either String Nights
 parseNightsQuery input =
   case read input :: Maybe Int of
-    Just n | 1 <= n && n <= 7 -> Just (Nights n)
-    _ -> "Invalid nights"
-
--- <hotelStays> ::= <locations><nights>
-parseHotelStayQuery :: String -> Either String HotelStay
-parseHotelStayQuery input =
-  case parseLocationQuery input of
-    Just location ->
-      case parseNightsQuery input of
-        Just nights -> Just (HotelStay location nights)
-        _ -> "Invalid nights"
-    _ -> "Invalid location"
+    Just n | 1 <= n && n <= 7 -> Right (Nights n)
+    _ -> Left "Invalid nights"
 
 -- <routes> ::= <hotelStays> | <hotelStays><routes>
 parseRouteQuery :: String -> Either String Route
 parseRouteQuery input =
   case parseHotelStayQuery input of
-    Just stay ->
+    Right stay ->
       case parseRouteQuery input of
-        Nothing -> Just (SingleStay stay)
-        Just route -> Just (MultipleStays stay route)
-    Nothing -> Nothing
+        _ -> Right (SingleStay stay)
+        route -> Right (MultipleStays stay route)
+    _ -> Left "Something went wrong"
 
 data State =
   EmptyState
