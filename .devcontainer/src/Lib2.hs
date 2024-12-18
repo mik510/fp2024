@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use newtype instead of data" #-}
 {-# LANGUAGE BlockArguments #-}
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 module Lib2
     ( Query(..),
     parseQuery,
@@ -40,42 +41,36 @@ instance Show Query where
   show (LocationQuery location) = "Location: " ++ location
   show (NightQuery nights) = "Nights: " ++ show nights
   show (HotelStayQuery (location, nights)) = "Hotel stay: " ++ location ++ " for " ++ show nights
-  show (RouteQuery route) = "Single hotel stay route: " ++ show (SingleStay)
+  --show (RouteQuery route) = "Single hotel stay route: " ++ show SingleStay
 --  show (RouteQuery route) = "Multiple hotel stays route: " ++ show (MultipleStays)
 
 type Parser a = String -> Either String (a, String)
 
 -- <root> ::= <command> 
-parseQuery :: String -> Either String Query 
-parseQuery input = 
-  case parseCommandQuery input of 
-    Right (Add, rest) -> 
-      case parseLocation rest of 
-        Left err -> Left err 
-        Right (location, rest') -> 
-          case parseNights rest' of 
-          Left err -> Left err 
-          Right (nights, _) -> Right (RouteQuery [HotelStayQuery (location, nights)]) 
-    Right (Remove, _) -> Left "Remove not yet implemented" 
-    Right (Change, _) -> Left "Change not yet implemented" 
-    Left err -> Left err
+parseQuery :: String -> Either String (Query, String)
+parseQuery input =
+  case input of
+    "ok" -> Left "No"
+
+    
+
 
 -- <command> ::= <addHotelStay> | <removeHotelStay> | <changeHotelStay>
-parseCommandQuery :: String -> Either String (Command, String) 
+parseCommandQuery :: String -> Either String Command
 parseCommandQuery input = 
   case input of 
-    "add" -> Right (Add, drop (length "add") input) 
-    "remove" -> Right (Remove, drop (length "remove") input) 
-    "change" -> Right (Change, drop (length "change") input) 
+    "add" -> Right Add 
+    "remove" -> Right Remove
+    "change" -> Right Change
     _ -> Left "Invalid command" 
 
 -- <addHotelStay> ::= add <hotelStays>
 parseAddHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseAddHotelStayQuery input =
   case parseCommandQuery input of
-    Right (Add, rest) ->
-      case parseHotelStayQuery rest of
-        Left err -> Left err
+    Right Add ->
+      case parseHotelStayQuery input of
+        Left err -> Left "Something went wrong"
         Right hotelStay -> Right (Add, hotelStay)
     _ -> Left "Invalid command"
 
@@ -84,8 +79,8 @@ parseAddHotelStayQuery input =
 parseRemoveHotelStayQuery :: String -> Either String (Command, HotelStay)
 parseRemoveHotelStayQuery input =
   case parseCommandQuery input of
-    Right (Remove, rest) ->
-      case parseHotelStayQuery rest of
+    Right Remove ->
+      case parseHotelStayQuery input of
         Left err -> Left err
         Right hotelStay -> Right (Remove, hotelStay)
     _ -> Left "Invalid command"
@@ -95,8 +90,8 @@ parseRemoveHotelStayQuery input =
 parseChangeHotelStayQuery :: String -> Either String (Command, HotelStay, HotelStay)
 parseChangeHotelStayQuery input =
   case parseCommandQuery input of
-    Right (Change, rest) ->
-      case parseHotelStayQuery rest of
+    Right Change ->
+      case parseHotelStayQuery input of
         Left err -> Left err
         Right hotelStay -> Right (Change, hotelStay, hotelStay)
     _ -> Left "Invalid command"
@@ -137,7 +132,7 @@ parseRouteQuery input =
     Right stay ->
       case parseRouteQuery input of
         _ -> Right (SingleStay stay)
-        route -> Right (MultipleStays stay route)
+        --route -> Right (MultipleStays stay route)
     _ -> Left "Something went wrong"
 
 data State =
@@ -152,7 +147,7 @@ data State =
 emptyState :: State
 emptyState = EmptyState
 
-stateTransition :: State -> Query -> Either String (Maybe String, State)
+--stateTransition :: State -> Query -> Either String (Maybe String, State)
 stateTransition EmptyState (LocationQuery location) =
   Right (["Location set to: " ++ show location], LocationState location)
 stateTransition (LocationState location) (NightQuery nights) =
